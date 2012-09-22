@@ -1,5 +1,6 @@
 import os
 import subprocess
+listaDatos = []
 
 #Devuelve la media muestral de la duracion de los segmentos con habla sobre la cantidad de fonos
 def getSpeakTimeMean(ipuList):
@@ -7,10 +8,23 @@ def getSpeakTimeMean(ipuList):
 	#print ipuList
 	return reduce(lambda x, y: x+((y[2]-y[1])/len(y[0])) , ipuList, 0)
 
-#Devuelve la media muestral de la duracion de los segmentos sin sonido
-#TODO: Sacar el silencio al principio y al fin
+def removeFirstSilence(ipuList):
+	toDelete = 0
+	for segment in ipuList:
+		if (segment[0] != '') and (segment[0] != '#') and (segment[0] != '# ') and (segment[0] != ' '):
+			break
+		else:
+			toDelete += 1
+	return ipuList[toDelete:]
+
+#Devuelve la media muestral de la duracion de los segmentos sin sonido (sin los silencios al principio ni al final de cada wav)
 def getSilenceTimeMean(ipuList):
-	ipuList = filter(lambda x: (x[0] == '') or (x[0] == '#'),ipuList)
+	#Borro los silencios al principio y al final para que solo queden los silencios entre segmentos
+	ipuList = removeFirstSilence(ipuList)
+	ipuList.reverse()
+	ipuList = removeFirstSilence(ipuList)
+
+	ipuList = filter(lambda x: (x[0] == '') or (x[0] == '#') or (x[0] == '# ') or (x[0] == ' '),ipuList)
 	silenceTime = reduce(lambda x, y: x+(y[2]-y[1]) , ipuList, 0)
 	return silenceTime/len(ipuList)
 
@@ -57,7 +71,7 @@ def getTestedData(fileName):
 		nativeFrom = item[4]
 	return {"name" : name, "subjectName" : subjectName, "gender" : gender, "city" : nativeFrom, "age" : age, "testNumber" : testNumber}
 
-#Devuelve los datos parseados en listas de los ipu
+#Devuelve los datos parseados en listas de los ipu, los datos de los .ipu son segmentos, se devuelve una lista de ["texto que se dice", tiempo_inicio, tiempo_termina]
 def getIpuData(fileName):
 	file = open(fileName, 'r')
 	lista = []
@@ -68,16 +82,24 @@ def getIpuData(fileName):
 	file.close()
 	return lista
 
-file = open("data.csv",'r')
-listaDatos = []
-for line in file:
-	listaDatos.append(line.replace('"', "").split('	'))
-file.close()
+#Carga los datos de data.csv y datos.csv en listaDatos
+def loadCSVData():
+	file = open("data.csv",'r')
+	global listaDatos
+	for line in file:
+		listaDatos.append(line.replace('"', "").split('	'))
+	file.close()
+	file = open("datos.csv", 'r')
+	for line in file:
+		listaDatos.append(line.split(','))
+	file.close()
 
 
-#fileName = "petaccio-B1.ipu"
+loadCSVData()
+print listaDatos
+
 for fileName in os.listdir("."):
 	if ".ipu" in fileName:
-		#print getSpeakTimeMean(getIpuData(fileName))
 		print fileName
-		print getF0Mean(fileName, getTestedData(fileName)["gender"])
+		print getSilenceTimeMean(getIpuData(fileName))
+		#print getF0Mean(fileName, getTestedData(fileName)["gender"])
