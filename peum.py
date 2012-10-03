@@ -91,12 +91,12 @@ loadCSVData()
 f = open("edadVsMasLentamente.csv",'w')
 maleList = []
 femaleList = []
+print "En todo tipo de texto, los hablantes de mayor edad hablan de manera mas pausada, es decir, correlacion entre el promedio, duracion/pausas vs edad"
 for fileName in os.listdir("."):
 	if ".ipu" in fileName:
-		if getTestedData(fileName)['testNumber'] == 1:
-			print fileName
-			print str(getTestedData(fileName)['age'])+","+str(getSpeakTimeMean(getIpuData(fileName)))
-			f.write(str(getTestedData(fileName)['age'])+","+str(getSpeakTimeMean(getIpuData(fileName)))+"\n")
+		print fileName
+		print str(getTestedData(fileName)['age'])+","+str(getSilenceTimeMean(getIpuData(fileName)))
+		f.write(str(getTestedData(fileName)['age'])+","+str(getSilenceTimeMean(getIpuData(fileName)))+"\n")
 		#if getTestedData(fileName)['gender'] == "f":
 		#	print getSilenceTimeMean(getIpuData(fileName))
 		#	f.write(str(getSilenceTimeMean(getIpuData(fileName)))+'\n')
