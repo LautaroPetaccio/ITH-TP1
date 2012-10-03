@@ -77,28 +77,34 @@ def getIpuData(fileName):
 
 #Carga los datos de data.csv y datos.csv en listaDatos
 def loadCSVData():
-	file = open("data.csv",'r')
 	global listaDatos
-	for line in file:
-		listaDatos.append(line.replace('"', "").split('	'))
-	file.close()
+	try:
+   		with open("data.csv", "r") as file:
+			for line in file:
+				listaDatos.append(line.replace('"', "").split('	'))
+	except IOError:
+		print "Error abriendo data.csv"
+
+
 	file = open("datos.csv", 'r')
 	for line in file:
 		listaDatos.append(line.split(','))
 	file.close()
 
 loadCSVData()
-f = open("edadVsMasLentamente.csv",'w')
+f = open("silenciosEspontaneos.csv",'w')
+x = open("silenciosHablaLeida.csv", 'w')
 maleList = []
 femaleList = []
-print "En todo tipo de texto, los hablantes de mayor edad hablan de manera mas pausada, es decir, correlacion entre el promedio, duracion/pausas vs edad"
 for fileName in os.listdir("."):
 	if ".ipu" in fileName:
+		if getTestedData(fileName)['testNumber'] == 1:
+			f.write(str(getSilenceTimeMean(getIpuData(fileName)))+"\n")
+		else:
+			x.write(str(getSilenceTimeMean(getIpuData(fileName)))+"\n")
 		print fileName
-		print str(getTestedData(fileName)['age'])+","+str(getSilenceTimeMean(getIpuData(fileName)))
-		f.write(str(getTestedData(fileName)['age'])+","+str(getSilenceTimeMean(getIpuData(fileName)))+"\n")
-		#if getTestedData(fileName)['gender'] == "f":
-		#	print getSilenceTimeMean(getIpuData(fileName))
-		#	f.write(str(getSilenceTimeMean(getIpuData(fileName)))+'\n')
+		print str(getSilenceTimeMean(getIpuData(fileName)))
 
+
+x.close()
 f.close()
